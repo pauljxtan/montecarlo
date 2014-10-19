@@ -1,8 +1,10 @@
 #ifndef DLA_HPP
 #define DLA_HPP
 
+#include <cstdio>
+
 class Dla {
-    friend class Walker;
+    //friend class Walker;
     private:
         int grid_width;
         int grid_height;
@@ -11,6 +13,7 @@ class Dla {
         double r;
         int radius;
         bool **anchors;
+
         int * get_points_on_square();
         double get_distance_from_center(int, int);
         void update_square_radius();
@@ -21,6 +24,7 @@ class Dla {
     public:
         Dla(int, int);
         void print_grid();
+        void write_grid_to_file(char *);
         void sim();
 };
 
