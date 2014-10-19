@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -34,6 +35,16 @@ void Dla::print_grid() {
             std::cout << anchors[i][j] << " ";
         std::cout << anchors[i][grid_width - 1] << "\n";
     }
+}
+
+void Dla::write_grid_to_file(char *outfile) {
+    std::FILE *p_outfile = std::fopen(outfile, "w");
+    for (int i = 0; i < grid_height; i++) {
+        for (int j = 0; j < grid_width - 1; j++)
+            std::fprintf(p_outfile, "%d ", anchors[i][j]);
+        std::fprintf(p_outfile, "%d\n", anchors[i][grid_width - 1]);
+    }
+    std::fclose(p_outfile);
 }
 
 int * Dla::get_points_on_square() {
