@@ -31,7 +31,6 @@ class Dla {
 class Walker {
     friend class Dla;
     private:
-        Dla *parent;
         int x;
         int y;
         int next_x;
