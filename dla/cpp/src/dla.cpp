@@ -48,11 +48,6 @@ void Dla::write_grid_to_file(char *outfile) {
 }
 
 int * Dla::get_points_on_square() {
-    // Not sure yet if should be > or >=
-    // This should be handled by the main loop
-    if (radius > grid_width / 2 || radius > grid_height / 2)
-        return NULL;
-
     int x, y;
     int i = 0;
     int *points = (int *) std::malloc(2 * (radius * 8) * sizeof(int));
@@ -90,7 +85,6 @@ double Dla::get_distance_from_center(int x, int y) {
 }
 
 void Dla::update_square_radius() {
-    //radius = 1 + (int) std::ceil(r);
     radius = (int) std::ceil(r + 1);
 }
 
@@ -107,12 +101,6 @@ void Dla::anchor_second_particle() {
 void Dla::walk_particle() {
     // Get all points on square of radius r + 1 around center
     int *points = get_points_on_square();
-    // This should be handled by the main loop, remove later
-    if (points == NULL) {
-        // End program
-        print_grid();
-        exit(0);
-    }
 
     // Choose random point to be starting position
     int n_points = radius * 8;
@@ -164,15 +152,13 @@ void Dla::sim() {
     // Anchor the second particle "manually" so that r becomes non-zero
     anchor_second_particle();
 
-    // Experiment with this
-    //while (r < grid_width / 2 && r < grid_height / 2) {
+    // Introduce new walkers until starting position reaches edge of grid
     while (radius < grid_width / 2 && radius < grid_height / 2) {
         walk_particle();
     }
 }
 
 Walker::Walker(Dla *parent, int x, int y) {
-    this->parent = parent;
     this->x = x;
     this->y = y;
 }
