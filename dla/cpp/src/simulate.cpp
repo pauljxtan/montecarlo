@@ -1,4 +1,6 @@
+#include <getopt.h>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include "dla.hpp"
 
@@ -7,14 +9,41 @@ void print_usage();
 int main(int argc, char *argv[]) {
     if (argc < 4) {
         print_usage();
-        exit(0);
+        return 0;
     }
 
-    int grid_width = std::atoi(argv[1]);
-    int grid_height = std::atoi(argv[2]);
-    char *outfile = argv[3];
+    int c;
+    int grid_width, grid_height;
+    char *outfile;
+    bool verbose = false;
 
-    Dla dla = Dla(grid_width, grid_height, false);
+    // Parse args
+    opterr = 0;
+    while ((c = getopt(argc, argv, "w:h:o:v")) != EOF) {
+        switch (c) {
+            case 'w':
+                grid_width = std::atoi(optarg);
+                break;
+            case 'h':
+                grid_height = std::atoi(optarg);
+                break;
+            case 'o':
+                outfile = optarg;
+                break;
+            case 'v':
+                verbose = true;
+                break;
+            default:
+                print_usage();
+                return 1;
+        }
+    }
+
+    std::cout << "Grid width      : " << grid_width << "\n";
+    std::cout << "Grid height     : " << grid_height << "\n";
+    std::cout << "Output filename : " << outfile << "\n";
+
+    Dla dla = Dla(grid_width, grid_height, verbose);
     dla.simulate();
     //dla.print_grid();
     dla.write_grid_to_file(outfile);
@@ -22,5 +51,5 @@ int main(int argc, char *argv[]) {
 }
 
 void print_usage() {
-    std::cout << "Usage: ./simulate grid_width grid_height output_file\n";
+    std::cout << "Usage: ./simulate -w grid_width -h grid_height -o output_filename [-v]\n";
 }
