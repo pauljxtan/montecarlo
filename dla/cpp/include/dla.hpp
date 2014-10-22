@@ -4,28 +4,28 @@
 #include <cstdio>
 
 class Dla {
-    //friend class Walker;
     private:
         int grid_width;
         int grid_height;
+        bool verbose;
+        bool **anchors;
         int center_x;
         int center_y;
         double r;
         int radius;
-        bool **anchors;
 
-        int * get_points_on_square();
-        double get_distance_from_center(int, int);
         void update_square_radius();
         void anchor_second_particle();
-        void walk_particle();
-        bool adjacent_to_anchor(int, int);
+        int * get_points_on_square();
+        double get_distance_from_center(int, int);
         bool point_not_in_grid(int, int);
+        bool adjacent_to_anchor(int, int);
+        void walk_particle();
     public:
-        Dla(int, int);
+        Dla(int, int, bool verbose);
         void print_grid();
         void write_grid_to_file(char *);
-        void sim();
+        void simulate();
 };
 
 class Walker {
@@ -35,7 +35,8 @@ class Walker {
         int y;
         int next_x;
         int next_y;
-        Walker(Dla *, int, int);
+
+        Walker(int, int);
         void move_to_next();
         void choose_next_coords();
 };

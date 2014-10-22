@@ -5,9 +5,12 @@
 #include <iostream>
 #include "dla.hpp"
 
-Dla::Dla(int grid_width, int grid_height) {
+/***************************************** CONSTRUCTOR *****************************************/
+
+Dla::Dla(int grid_width, int grid_height, bool verbose) {
     this->grid_width = grid_width;
     this->grid_height = grid_height;
+    this->verbose = verbose;
 
     // Initialize all cells to zero
     this->anchors = (bool **) std::malloc(grid_height * sizeof(bool *));
@@ -18,16 +21,29 @@ Dla::Dla(int grid_width, int grid_height) {
             this->anchors[i][j] = false;
     }
 
-    // Anchor a particle at the center
+    // Get coordinates of grid center
     this->center_x = grid_height / 2;
     this->center_y = grid_width / 2;
-    this->anchors[this->center_x][this->center_y] = true;
-    //std::cout << "New anchor at (" << center_x << "," << center_y << ")\n";
-    this->r = 0.0;
-    this->radius = 1;
 
+    // Anchor first particle at center
+    this->anchors[this->center_x][this->center_y] = true;
+    if (verbose)
+        std::cout << "New anchor at (" << center_x << "," << center_y << ")\n";
+    
+    // Set initial radius for new walkers
+    this->r = 0.0;
+    update_square_radius();
+
+    // Anchor second particle
+    anchor_second_particle();
+
+    // Seed random generator
     std::srand(std::time(NULL));
 }
+
+/***********************************************************************************************/
+
+/************************************** PUBLIC FUNCTIONS ***************************************/
 
 void Dla::print_grid() {
     for (int i = 0; i < grid_height; i++) {
@@ -45,6 +61,34 @@ void Dla::write_grid_to_file(char *outfile) {
         std::fprintf(p_outfile, "%d\n", anchors[i][grid_width - 1]);
     }
     std::fclose(p_outfile);
+}
+
+void Dla::simulate() {
+    // Introduce new walkers until starting position reaches edge of grid
+    while (radius < grid_width / 2 && radius < grid_height / 2) {
+        walk_particle();
+    }
+}
+
+/***********************************************************************************************/
+
+/************************************** PRIVATE FUNCTIONS **************************************/
+void Dla::update_square_radius() {
+    radius = (int) std::ceil(r + 1);
+}
+
+void Dla::anchor_second_particle() {
+    int test = std::rand() % 4;
+    int x, y;
+    if (test == 0)      { x = center_x - 1; y = center_y; }
+    else if (test == 0) { x = center_x + 1; y = center_y; }
+    else if (test == 0) { x = center_x    ; y = center_y - 1; }
+    else                { x = center_x    ; y = center_y + 1; }
+    anchors[x][y] = true;
+    r++;
+    update_square_radius();
+    if (verbose)
+        std::cout << "New anchor at (" << x << "," << y << ")\n";
 }
 
 int * Dla::get_points_on_square() {
@@ -76,7 +120,7 @@ int * Dla::get_points_on_square() {
         points[i++] = x;
         points[i++] = y;
     }
-    
+
     return points;
 }
 
@@ -84,18 +128,17 @@ double Dla::get_distance_from_center(int x, int y) {
     return std::sqrt(std::pow(x - center_x, 2) + std::pow(y - center_y, 2));
 }
 
-void Dla::update_square_radius() {
-    radius = (int) std::ceil(r + 1);
+// Faster than checking if point in grid since it short-circuits
+bool Dla::point_not_in_grid(int x, int y) {
+    return (x < 0 || x >= grid_height || y < 0 || y >= grid_width);
 }
 
-void Dla::anchor_second_particle() {
-    int test = std::rand() % 4;
-    if (test == 0) anchors[center_x - 1][center_y] = true;
-    else if (test == 1) anchors[center_x + 1][center_y] = true;
-    else if (test == 2) anchors[center_x][center_y - 1] = true;
-    else anchors[center_x][center_y + 1] = true;
-    r = 1.0;
-    update_square_radius();
+bool Dla::adjacent_to_anchor(int x, int y) {
+    if (!point_not_in_grid(x - 1, y) && anchors[x - 1][y]) return true;
+    if (!point_not_in_grid(x + 1, y) && anchors[x + 1][y]) return true;
+    if (!point_not_in_grid(x, y - 1) && anchors[x][y - 1]) return true;
+    if (!point_not_in_grid(x, y + 1) && anchors[x][y + 1]) return true;
+    return false;
 }
 
 void Dla::walk_particle() {
@@ -109,7 +152,7 @@ void Dla::walk_particle() {
     int start_y = points[test * 2 + 1];
     std::free(points);
 
-    Walker walker = Walker(this, start_x, start_y);
+    Walker walker = Walker(start_x, start_y);
     // Initialize to fake value
     double distance = 0.0;
 
@@ -122,7 +165,8 @@ void Dla::walk_particle() {
         distance = get_distance_from_center(walker.x, walker.y);
         if (adjacent_to_anchor(walker.x, walker.y)) {
             // Anchor this particle
-            //std::cout << "New anchor at (" << walker.x << "," << walker.y << ")\n";
+            if (verbose)
+                std::cout << "New anchor at (" << walker.x << "," << walker.y << ")\n";
             anchors[walker.x][walker.y] = true;
             // Update furthest distance from center if necessary
             if (r < distance) {
@@ -135,33 +179,16 @@ void Dla::walk_particle() {
     }
 }
 
-bool Dla::adjacent_to_anchor(int x, int y) {
-    if (!point_not_in_grid(x - 1, y) && anchors[x - 1][y]) return true;
-    if (!point_not_in_grid(x + 1, y) && anchors[x + 1][y]) return true;
-    if (!point_not_in_grid(x, y - 1) && anchors[x][y - 1]) return true;
-    if (!point_not_in_grid(x, y + 1) && anchors[x][y + 1]) return true;
-    return false;
-}
+/***************************************** CONSTRUCTOR *****************************************/
 
-// Faster than checking if point in grid since it short-circuits
-bool Dla::point_not_in_grid(int x, int y) {
-    return (x < 0 || x >= grid_height || y < 0 || y >= grid_width);
-}
-
-void Dla::sim() {
-    // Anchor the second particle "manually" so that r becomes non-zero
-    anchor_second_particle();
-
-    // Introduce new walkers until starting position reaches edge of grid
-    while (radius < grid_width / 2 && radius < grid_height / 2) {
-        walk_particle();
-    }
-}
-
-Walker::Walker(Dla *parent, int x, int y) {
+Walker::Walker(int x, int y) {
     this->x = x;
     this->y = y;
 }
+
+/***********************************************************************************************/
+
+/************************************** PRIVATE FUNCTIONS **************************************/
 
 void Walker::move_to_next() {
     x = next_x;
