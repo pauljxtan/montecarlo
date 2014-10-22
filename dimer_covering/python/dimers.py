@@ -82,11 +82,8 @@ class Grid(object):
                 print "Removed dimer from", sites
 
     def has_single_dimer(self, sites):
-        if (self.cells[sites[0]][1] and self.cells[sites[1]][1]
-            and self.cells[sites[0]][1] == self.cells[sites[1]][1]):
-            return True
-
-        return False
+        return (self.cells[sites[0]][1]
+                and self.cells[sites[0]][1] == self.cells[sites[1]][1])
 
 class Dimer(object):
     def __init__(self, sites):
