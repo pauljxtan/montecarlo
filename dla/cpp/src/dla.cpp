@@ -34,11 +34,11 @@ Dla::Dla(int grid_width, int grid_height, bool verbose) {
     this->r = 0.0;
     update_square_radius();
 
-    // Anchor second particle
-    anchor_second_particle();
-
     // Seed random generator
     std::srand(std::time(NULL));
+
+    // Anchor second particle
+    anchor_second_particle();
 }
 
 /***********************************************************************************************/
