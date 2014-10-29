@@ -1,0 +1,8 @@
+# C/C++
+*.o
+
+# Java
+*.class
+
+# Misc
+*.dat
