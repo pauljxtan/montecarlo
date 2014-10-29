@@ -4,8 +4,8 @@ import javax.swing.JFrame;
 public class Main {
     public static void main(String[] args) {
         // Get these from user input later
-        final int width = 100;
-        final int height = 100;
+        final int gridWidth = 100;
+        final int gridHeight = 100;
         final double tempFinal = 1e-3;
         final double tempInit = 10.0;
         final double tau = 1e4;
@@ -18,10 +18,11 @@ public class Main {
 
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(width * 10 + 50, height * 10 + 50);
+        //frame.setSize(width * 10 + 50, height * 10 + 50);
+        frame.setSize(GridPanel.PANEL_WIDTH, GridPanel.PANEL_HEIGHT);
         frame.setVisible(true);
 
-        GridPanel gridPanel = new GridPanel(width, height);
+        GridPanel gridPanel = new GridPanel(gridWidth, gridHeight);
         frame.add(gridPanel);
 
         while (temp > tempFinal) {
@@ -29,17 +30,17 @@ public class Main {
             temp = cooling(t, tau, tempInit);
 
             // Do the Markov chain
-            Coordinate[] sites = gridPanel.grid.pickSites();
-            if (gridPanel.grid.hasSingleDimer(sites)) {
+            Coordinate[] sites = gridPanel.pickSites();
+            if (gridPanel.hasSingleDimer(sites)) {
                 if (random.nextDouble() < Math.exp(-1 / temp))
-                        gridPanel.grid.removeDimer(sites);
+                        gridPanel.removeDimer(sites);
             }
-            else if (gridPanel.grid.cells.get(sites[0]).dimer == null
-                     && gridPanel.grid.cells.get(sites[1]).dimer == null)
-                gridPanel.grid.placeDimer(sites);
+            else if (gridPanel.getCells().get(sites[0]).dimer == null
+                     && gridPanel.getCells().get(sites[1]).dimer == null)
+                gridPanel.placeDimer(sites);
             
             if (t % (frameSkip + 1) == 0) {
-                System.out.format("%d %f %d\n", t, temp, gridPanel.grid.nDimers);
+                System.out.format("%d %f %d\n", t, temp, gridPanel.getNDimers());
                 gridPanel.repaint();
             }
         }
