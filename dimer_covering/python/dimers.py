@@ -1,5 +1,6 @@
 import math, random
 from matplotlib import pyplot
+import sys
 
 """
 Generates solutions to the dimer-covering problem using simulated annealing.
@@ -54,8 +55,7 @@ class Grid(object):
         """
         if self.cells[sites[0]][1] or self.cells[sites[1]][1]:
             # Site(s) is/are occupied; terminate
-            if verbose:
-                print "Site(s) is/are occupied; skipping"
+            if verbose: print "Site(s) is/are occupied; skipping"
             return
         
         dimer = Dimer(sites)
@@ -63,8 +63,7 @@ class Grid(object):
         self.cells[sites[1]][1] = dimer
         self.n_dimers += 1
 
-        if verbose:
-            print "Placed dimer at", sites
+        if verbose: print "Placed dimer at", sites
 
     def remove_dimer(self, sites, verbose=False):
         """
@@ -109,37 +108,48 @@ def pick_sites(grid):
 def cooling(t, tau, T_max):
     return T_max * math.exp(-t / tau)
 
-def main():
-    # Get these from user input later
-    T_min = 1e-2
-    T_max = 10.0
-    tau = 1e4
-    width = 20
-    height = 20
-    frameskip = 100
+def parse_infile(infile):
+    params = open(infile).read().split()
+    width = int(params[0])
+    height = int(params[1])
+    T_min = float(params[2])
+    T_max = float(params[3])
+    tau = float(params[4])
+    
+    return width, height, T_min, T_max, tau
 
-    print "Initializing the grid..."
+def main():
+    #T_min = 1e-2
+    #T_max = 10.0
+    #tau = 1e4
+    #width = 50
+    #height = 50
+    #frameskip = 100
+
+    width, height, T_min, T_max, tau = parse_infile(sys.argv[1])
+
+    #print "Initializing the grid..."
 
     grid = Grid(width, height)
 
-    print "Setting up the animation (might take a while if grid is large)..."
+    #print "Setting up the animation (might take a while if grid is large)..."
 
     # Set up matplotlib figure
-    pyplot.ion()
-    fig = pyplot.figure()
-    sp = fig.add_subplot(111)
-    sp.set_xlim(-1, grid.width)
-    sp.set_ylim(-1, grid.width)
+    #pyplot.ion()
+    #fig = pyplot.figure()
+    #sp = fig.add_subplot(111)
+    #sp.set_xlim(-1, grid.width)
+    #sp.set_ylim(-1, grid.width)
     # Initialize circles
-    circles = [[sp.scatter(x, y, alpha=0.0, c='k') for y in range(width)] for x in range(height)]
-    lines = {}
+    #circles = [[sp.scatter(x, y, alpha=0.0, c='k') for y in range(width)] for x in range(height)]
+    #lines = {}
     # Initialize lines joining circles
     #     TODO: Figure out how to skip repeating lines
-    for x in range(height):
-        for y in range(width):
-            adjacents = grid.cells[(x, y)][0]
-            for adjacent in adjacents:
-                lines[((x, y), adjacent)] = sp.plot((x, adjacent[0]), (y, adjacent[1]), 'k-', alpha=0.0)
+    #for x in range(height):
+    #    for y in range(width):
+    #        adjacents = grid.cells[(x, y)][0]
+    #        for adjacent in adjacents:
+    #            lines[((x, y), adjacent)] = sp.plot((x, adjacent[0]), (y, adjacent[1]), 'k-', alpha=0.0)
 
     print "Started Markov chain"
 
@@ -157,21 +167,27 @@ def main():
             # Decide whether to remove
             if random.random() < math.exp(-1 / T):
                 grid.remove_dimer(sites, False)
-                circles[sites[0][0]][sites[0][1]].set_alpha(0.0)
-                circles[sites[1][0]][sites[1][1]].set_alpha(0.0)
-                lines[(sites[0], sites[1])][0].set_alpha(0.0)
-                lines[(sites[1], sites[0])][0].set_alpha(0.0)
+                #circles[sites[0][0]][sites[0][1]].set_alpha(0.0)
+                #circles[sites[1][0]][sites[1][1]].set_alpha(0.0)
+                #lines[(sites[0], sites[1])][0].set_alpha(0.0)
+                #lines[(sites[1], sites[0])][0].set_alpha(0.0)
         elif not (grid.cells[sites[0]][1] or grid.cells[sites[1]][1]):
             # Always add dimer to empty sites
             grid.place_dimer(sites, False)
-            circles[sites[0][0]][sites[0][1]].set_alpha(1.0)
-            circles[sites[1][0]][sites[1][1]].set_alpha(1.0)
-            lines[(sites[0], sites[1])][0].set_alpha(1.0)
-            lines[(sites[1], sites[0])][0].set_alpha(1.0)
-        if t % frameskip == 0:
-            sp.set_title("t=%07d, T=%.3f, n_dimers=%d" % (t, T, grid.n_dimers))
+            #circles[sites[0][0]][sites[0][1]].set_alpha(1.0)
+            #circles[sites[1][0]][sites[1][1]].set_alpha(1.0)
+            #lines[(sites[0], sites[1])][0].set_alpha(1.0)
+            #lines[(sites[1], sites[0])][0].set_alpha(1.0)
+        #if t % frameskip == 0:
+            # Redraw the figure
+            #sp.clear()
+            #for x in range(height):
+            #    for y in range(width):
+            #        if grid.cells[(x, y)][1]:
+            #            sp.scatter(x, y, c='k')
+            #sp.set_title("t=%07d, T=%.3f, n_dimers=%d" % (t, T, grid.n_dimers))
             #fig.savefig("./test/%07d_%.3f_%d.png" % (t, T, grid.n_dimers))
-            pyplot.draw()
+            #pyplot.draw()
 
         if t % 1000 == 0:
             print t, T, grid.n_dimers
