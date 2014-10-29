@@ -4,8 +4,8 @@ import javax.swing.JFrame;
 public class Main {
     public static void main(String[] args) {
         // Get these from user input later
-        final int width = 50;
-        final int height = 50;
+        final int width = 100;
+        final int height = 100;
         final double tempFinal = 1e-3;
         final double tempInit = 10.0;
         final double tau = 1e4;
