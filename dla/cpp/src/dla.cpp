@@ -32,7 +32,7 @@ Dla::Dla(int grid_width, int grid_height, bool verbose) {
     
     // Set initial radius for new walkers
     this->r = 0.0;
-    update_square_radius();
+    update_box_radius();
 
     // Seed random generator
     std::srand(std::time(NULL));
@@ -73,7 +73,7 @@ void Dla::simulate() {
 /***********************************************************************************************/
 
 /************************************** PRIVATE FUNCTIONS **************************************/
-void Dla::update_square_radius() {
+void Dla::update_box_radius() {
     radius = (int) std::ceil(r + 1);
 }
 
@@ -86,12 +86,12 @@ void Dla::anchor_second_particle() {
     else                { x = center_x    ; y = center_y + 1; }
     anchors[x][y] = true;
     r++;
-    update_square_radius();
+    update_box_radius();
     if (verbose)
         std::cout << "New anchor at (" << x << "," << y << ")\n";
 }
 
-int * Dla::get_points_on_square() {
+int * Dla::get_points_on_box() {
     int x, y;
     int i = 0;
     int *points = (int *) std::malloc(2 * (radius * 8) * sizeof(int));
@@ -142,8 +142,8 @@ bool Dla::adjacent_to_anchor(int x, int y) {
 }
 
 void Dla::walk_particle() {
-    // Get all points on square of radius r + 1 around center
-    int *points = get_points_on_square();
+    // Get all points on box of radius r + 1 around center
+    int *points = get_points_on_box();
 
     // Choose random point to be starting position
     int n_points = radius * 8;
@@ -171,8 +171,8 @@ void Dla::walk_particle() {
             // Update furthest distance from center if necessary
             if (r < distance) {
                 r = distance;
-                // Update square radius
-                update_square_radius();
+                // Update box radius
+                update_box_radius();
             }
             return;
         }
