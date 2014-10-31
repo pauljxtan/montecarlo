@@ -6,7 +6,7 @@
 void print_usage();
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
+    if (argc < 7) {
         print_usage();
         return 0;
     }
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
     // Parse args
     opterr = 0;
-    while ((c = getopt(argc, argv, "w:h:o:v")) != EOF) {
+    while ((c = getopt(argc, argv, "w:h:o:v")) != -1) {
         switch (c) {
             case 'w':
                 grid_width = std::atoi(optarg);
