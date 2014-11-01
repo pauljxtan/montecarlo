@@ -1,29 +1,47 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Random;
+import java.util.Scanner;
 import javax.swing.JFrame;
 
 public class Main {
-    public static void main(String[] args) {
-        // Get these from user input later
-        final int gridWidth = 100;
-        final int gridHeight = 100;
-        final double tempFinal = 1e-3;
-        final double tempInit = 10.0;
-        final double tau = 1e4;
-        final int frameSkip = 0;
+    public static void main(String[] args) throws FileNotFoundException {
+        if (args.length == 0) {
+            System.err.println("Input file not given");
+            return;
+        }
+
+        if (args.length > 1) {
+            System.err.println("Too many arguments given");
+            return;
+        }
+
+        // Read parameters from input file
+        File infile = new File(args[0]);
+        Scanner scanner = new Scanner(new File(args[0]));
+        int gridWidth = scanner.nextInt();
+        int gridHeight = scanner.nextInt();
+        double tempInit = scanner.nextDouble();
+        double tempFinal = scanner.nextDouble();
+        double tau = scanner.nextDouble();
+        int frameSkip = scanner.nextInt();
+        boolean verbose = (scanner.nextInt() == 0) ? false : true;
 
         Random random = new Random();
 
-        int t = 0;
-        double temp = tempInit;
-
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.setSize(width * 10 + 50, height * 10 + 50);
         frame.setSize(GridPanel.PANEL_WIDTH, GridPanel.PANEL_HEIGHT);
         frame.setVisible(true);
 
         GridPanel gridPanel = new GridPanel(gridWidth, gridHeight);
         frame.add(gridPanel);
+
+        int t = 0;
+        double temp = tempInit;
+
+        if (!verbose)
+            System.out.println("Simulating...");
 
         while (temp > tempFinal) {
             t++;
@@ -40,11 +58,14 @@ public class Main {
                 gridPanel.placeDimer(sites);
             
             if (t % (frameSkip + 1) == 0) {
-                System.out.format("%d %f %d\n", t, temp, gridPanel.getNDimers());
+                if (verbose)
+                    System.out.format("%d %f %d\n", t, temp, gridPanel.getNDimers());
                 gridPanel.repaint();
             }
         }
-
+        // Print the final state
+        if (!verbose)
+            System.out.format("Final state: %d %f %d\n", t, temp, gridPanel.getNDimers());
     }
 
     /**
