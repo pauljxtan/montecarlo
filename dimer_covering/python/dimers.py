@@ -105,30 +105,40 @@ def pick_sites(grid):
     site2 = random.choice(grid.cells[site1][0])
     return (site1, site2)
 
-def cooling(t, tau, T_max):
-    return T_max * math.exp(-t / tau)
+def cooling(t, tau, T_init):
+    return T_init * math.exp(-t / tau)
 
 def parse_infile(infile):
     params = open(infile).read().split()
     width = int(params[0])
     height = int(params[1])
-    T_min = float(params[2])
-    T_max = float(params[3])
+    T_final = float(params[2])
+    T_init = float(params[3])
     tau = float(params[4])
     
-    return width, height, T_min, T_max, tau
+    return width, height, T_final, T_init, tau
 
 def main():
-    #T_min = 1e-2
-    #T_max = 10.0
+    #T_final = 1e-2
+    #T_init = 10.0
     #tau = 1e4
     #width = 50
     #height = 50
     #frameskip = 100
 
-    width, height, T_min, T_max, tau = parse_infile(sys.argv[1])
+    if len(sys.argv) < 2:
+        print "Parameter file not given"
+        return
 
-    #print "Initializing the grid..."
+    width, height, T_init, T_final, tau = parse_infile(sys.argv[1])
+    print "Lattice width       = ", width
+    print "Lattice height      = ", height
+    print "Initial temperature = ", T_init
+    print "Final temperature   = ", T_final
+    print "Cooling timescale   = ", tau
+    print 
+
+    print "Initializing the grid..."
 
     grid = Grid(width, height)
 
@@ -154,11 +164,11 @@ def main():
     print "Started Markov chain"
 
     t = 0
-    T = T_max
-    while T > T_min:
+    T = T_init
+    while T > T_final:
         t += 1
 
-        T = cooling(t, tau, T_max)
+        T = cooling(t, tau, T_init)
 
         # Do the Markov chain        
         sites = pick_sites(grid)
