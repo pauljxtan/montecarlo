@@ -4,6 +4,9 @@ import java.util.Random;
 import java.util.Scanner;
 import javax.swing.JFrame;
 
+import dimers.GridPanel;
+import dimers.Coordinate;
+
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
         if (args.length == 0) {
@@ -53,8 +56,7 @@ public class Main {
                 if (random.nextDouble() < Math.exp(-1 / temp))
                         gridPanel.removeDimer(sites);
             }
-            else if (gridPanel.getCells().get(sites[0]).dimer == null
-                     && gridPanel.getCells().get(sites[1]).dimer == null)
+            else if (gridPanel.hasNoDimer(sites))
                 gridPanel.placeDimer(sites);
             
             if (t % (frameSkip + 1) == 0) {
