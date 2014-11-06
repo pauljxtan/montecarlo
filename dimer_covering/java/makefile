@@ -3,6 +3,7 @@ JFLAGS = -g
 
 SOURCES = $(wildcard *.java)
 CLASSES = $(SOURCES:.java=.class)
+PACKAGES = dimers
 
 all : $(CLASSES)
 
@@ -10,4 +11,4 @@ all : $(CLASSES)
 	$(JC) $(JFLAGS) $<
 
 clean :
-	rm $(CLASSES)
+	rm $(CLASSES) $(PACKAGES)/*.class
