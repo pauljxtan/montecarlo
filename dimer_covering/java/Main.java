@@ -59,7 +59,7 @@ public class Main {
             else if (gridPanel.hasNoDimer(sites))
                 gridPanel.placeDimer(sites);
             
-            if (t % (frameSkip + 1) == 0) {
+            if (t % frameSkip == 0) {
                 if (verbose)
                     System.out.format("%d %f %d\n", t, temp, gridPanel.getNDimers());
                 gridPanel.repaint();
