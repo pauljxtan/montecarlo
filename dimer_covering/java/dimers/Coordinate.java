@@ -34,8 +34,8 @@ public class Coordinate {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash *= 17 + this.x;
-        hash *= 31 + this.y;
+        hash = hash * 17 + this.x;
+        hash = hash * 31 + this.y;
         return hash;
     }
 }
