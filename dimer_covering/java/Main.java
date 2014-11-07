@@ -28,6 +28,7 @@ public class Main {
         double tempFinal = scanner.nextDouble();
         double tau = scanner.nextDouble();
         int frameSkip = scanner.nextInt();
+        if (frameSkip == 0) frameSkip = 1; // same thing
         boolean verbose = (scanner.nextInt() == 0) ? false : true;
 
         Random random = new Random();
