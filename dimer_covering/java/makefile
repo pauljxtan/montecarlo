@@ -1,15 +1,13 @@
 JC = javac
 JFLAGS = -g
 
-SOURCES = $(wildcard *.java)
+SOURCES = $(wildcard *.java) $(wildcard dimers/*.java)
 CLASSES = $(SOURCES:.java=.class)
 
 all : $(CLASSES)
-	cd dimers; make
 
 %.class : %.java
 	$(JC) $(JFLAGS) $<
 
 clean :
 	rm $(CLASSES)
-	cd dimers; make clean
