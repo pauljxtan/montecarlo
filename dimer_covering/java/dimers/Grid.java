@@ -110,10 +110,10 @@ class Grid {
      * @return the two chosen sites
      */
     Coordinate[] pickSites() {
-        Coordinate site1 = new Coordinate(random.nextInt(this.width),
-                                          random.nextInt(this.height));
-        Coordinate site2 = new Coordinate(this.cells.get(site1).adjacentCells.get(random.nextInt(
-                                          this.cells.get(site1).adjacentCells.size())));
+        Coordinate site1 = new Coordinate(random.nextInt(this.height),
+                                          random.nextInt(this.width));
+        ArrayList<Coordinate> adjacents = this.cells.get(site1).adjacentCells;
+        Coordinate site2 = new Coordinate(adjacents.get(random.nextInt(adjacents.size())));
         Coordinate[] sites = {site1, site2};
         return sites;
     }
