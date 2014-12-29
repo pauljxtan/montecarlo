@@ -1,1 +1,2 @@
-null pointer exception for non-square grids
+GridPanel:
+    dynamic sizing for grid window not working properly
