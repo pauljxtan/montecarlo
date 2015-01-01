@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from matplotlib import pyplot
+import numpy as np
 import sys
 
 def main():
@@ -28,7 +29,12 @@ def main():
             i += 2
         sp.clear()
         sp.set_title("t=%d, dist=%f" % (t, dist))
-        sp.plot(x, y, 'ko-')
+        #sp.plot(x, y, 'ko-')
+        # Plot arrows showing trajectory
+        x = np.array(x)
+        y = np.array(y)
+        sp.quiver(x[:-1], y[:-1], x[1:] - x[:-1], y[1:] - y[:-1],
+                  angles='xy', scale=1, scale_units='xy')
         pyplot.draw()
 
 if __name__ == '__main__':
