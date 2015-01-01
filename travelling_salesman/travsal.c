@@ -11,7 +11,7 @@
  *     tau         : 1e4
  *
  * Usage:
- *     travsal ./travsal -n 100 -w 100 -h 100 -i 1e-3 -f 10 -t 1e4
+ *     travsal -n 100 -w 100 -h 100 -i 1e-3 -f 10 -t 1e4
  */
 
 #include <getopt.h>
