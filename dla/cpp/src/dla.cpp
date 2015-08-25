@@ -80,10 +80,12 @@ void Dla::update_box_radius() {
 void Dla::anchor_second_particle() {
     int test = std::rand() % 4;
     int x, y;
-    if (test == 0)      { x = center_x - 1; y = center_y; }
-    else if (test == 1) { x = center_x + 1; y = center_y; }
-    else if (test == 2) { x = center_x    ; y = center_y - 1; }
-    else                { x = center_x    ; y = center_y + 1; }
+    switch (test) {
+        case 0:  x = center_x - 1; y = center_y;     break;
+        case 1:  x = center_x + 1; y = center_y;     break;
+        case 2:  x = center_x    ; y = center_y - 1; break;
+        default: x = center_x    ; y = center_y + 1;
+    }
     anchors[x][y] = true;
     r++;
     update_box_radius();
@@ -197,22 +199,11 @@ void Walker::move_to_next() {
 
 void Walker::choose_next_coords() {
     int test;
-
     test = std::rand() % 4;
-    if (test == 0) {
-        next_x = x - 1;
-        next_y = y;
-    }
-    else if (test == 1) {
-        next_x = x + 1;
-        next_y = y;
-    }
-    else if (test == 2) {
-        next_x = x;
-        next_y = y - 1;
-    }
-    else {
-        next_x = x;
-        next_y = y + 1;
+    switch (test) {
+        case 0:  next_x = x - 1; next_y = y; break;
+        case 1:  next_x = x + 1; next_y = y; break;
+        case 2:  next_x = x; next_y = y - 1; break;
+        default: next_x = x; next_y = y + 1;
     }
 }

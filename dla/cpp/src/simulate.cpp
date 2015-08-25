@@ -39,9 +39,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (!verbose) {
+        std::cout << "================================\n";
         std::cout << "Grid width      : " << grid_width << "\n";
         std::cout << "Grid height     : " << grid_height << "\n";
         std::cout << "Output filename : " << outfile << "\n";
+        std::cout << "================================\n";
+        std::cout << "Simulating...\n";
     }
 
     Dla dla = Dla(grid_width, grid_height, verbose);
