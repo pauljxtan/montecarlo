@@ -81,8 +81,8 @@ void Dla::anchor_second_particle() {
     int test = std::rand() % 4;
     int x, y;
     if (test == 0)      { x = center_x - 1; y = center_y; }
-    else if (test == 0) { x = center_x + 1; y = center_y; }
-    else if (test == 0) { x = center_x    ; y = center_y - 1; }
+    else if (test == 1) { x = center_x + 1; y = center_y; }
+    else if (test == 2) { x = center_x    ; y = center_y - 1; }
     else                { x = center_x    ; y = center_y + 1; }
     anchors[x][y] = true;
     r++;
