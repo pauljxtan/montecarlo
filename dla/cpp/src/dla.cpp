@@ -78,17 +78,25 @@ void Dla::update_box_radius() {
 }
 
 void Dla::anchor_second_particle() {
-    int test = std::rand() % 4;
     int x, y;
+
+    // Generate a random test value
+    int test = std::rand() % 4;
+    // Pick a random position adjent to the center particle
     switch (test) {
         case 0:  x = center_x - 1; y = center_y;     break;
         case 1:  x = center_x + 1; y = center_y;     break;
         case 2:  x = center_x    ; y = center_y - 1; break;
         default: x = center_x    ; y = center_y + 1;
     }
+
+    // Mark it on the grid
     anchors[x][y] = true;
+
+    // Update the bounding box
     r++;
     update_box_radius();
+
     if (verbose)
         std::cout << "New anchor at (" << x << "," << y << ")\n";
 }
