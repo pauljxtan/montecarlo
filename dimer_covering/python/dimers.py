@@ -1,10 +1,19 @@
-import math, random
-from matplotlib import pyplot
-import sys
+#!/usr/bin/env python
 
 """
 Generates solutions to the dimer-covering problem using simulated annealing.
 """
+
+# TODO:
+# -- optimize (setup takes way too long)
+# -- option to draw text grids
+# -- use argparse
+# -- output text results
+
+import math
+import random
+import sys
+import time
 
 class Grid(object):
     def __init__(self, width, height):
@@ -57,7 +66,7 @@ class Grid(object):
             # Site(s) is/are occupied; terminate
             if verbose: print "Site(s) is/are occupied; skipping"
             return
-        
+
         dimer = Dimer(sites)
         self.cells[sites[0]][1] = dimer
         self.cells[sites[1]][1] = dimer
@@ -83,6 +92,37 @@ class Grid(object):
     def has_single_dimer(self, sites):
         return (self.cells[sites[0]][1]
                 and self.cells[sites[0]][1] == self.cells[sites[1]][1])
+
+    def dimers(self):
+        """
+        Returns all dimers on the grid.
+        """
+        return set([value[1] for key, value in self.cells.items() if value[1]])
+
+    def draw(self):
+        """
+        Returns a string representation of the grid.
+        """
+        result = [[" " for _ in range(self.width * 2)] for _ in range(self.height * 2)]
+        for dimer in self.dimers():
+            site_0 = dimer.sites[0]
+            site_1 = dimer.sites[1]
+
+            coords_0 = (site_0[0] * 2, site_0[1] * 2)
+            coords_1 = (site_1[0] * 2, site_1[1] * 2)
+
+            line_symbol = "-" if coords_0[0] == coords_1[0] else "|"
+            line_row = (coords_0[0] if coords_0[0] == coords_1[0]
+                        else (coords_0[0] + coords_1[0]) / 2)
+            line_col = (coords_0[1] if coords_0[1] == coords_1[1]
+                        else (coords_0[1] + coords_1[1]) / 2)
+
+            result[coords_0[0]][coords_0[1]] = "o"
+            result[coords_1[0]][coords_1[1]] = "o"
+            result[line_row][line_col] = line_symbol
+
+        return "\n".join("".join(line) for line in result)
+
 
 class Dimer(object):
     def __init__(self, sites):
@@ -115,53 +155,65 @@ def parse_infile(infile):
     T_final = float(params[2])
     T_init = float(params[3])
     tau = float(params[4])
-    
+
     return width, height, T_final, T_init, tau
 
-def main():
-    #T_final = 1e-2
-    #T_init = 10.0
-    #tau = 1e4
-    #width = 50
-    #height = 50
-    #frameskip = 100
+def main(frameskip=10, draw_text=True, draw_mpl=False):
+    if draw_mpl:
+        from matplotlib import pyplot
+
+    width_default = 50
+    height_default = 25
+    T_init_default = 10.0
+    T_final_default = 0.025
+    tau_default = 10000.0
 
     if len(sys.argv) < 2:
-        print "Parameter file not given"
-        return
+        print "Parameter file not specified - using default parameters"
+        width = width_default
+        height = height_default
+        T_init = T_init_default
+        T_final = T_final_default
+        tau = tau_default
+    else:
+        infile = sys.argv[1]
+        print "Using parameters from file:", infile
+        width, height, T_init, T_final, tau = parse_infile(sys.argv[1])
 
-    width, height, T_init, T_final, tau = parse_infile(sys.argv[1])
+    print "-" * 64
     print "Lattice width       = ", width
     print "Lattice height      = ", height
     print "Initial temperature = ", T_init
     print "Final temperature   = ", T_final
     print "Cooling timescale   = ", tau
-    print 
+    print "-" * 64
 
     print "Initializing the grid..."
 
     grid = Grid(width, height)
 
-    #print "Setting up the animation (might take a while if grid is large)..."
+    if draw_mpl:
+        print "Setting up the matplotlib figure"
+        print "This will take quite a while if the grid is large (~50x50)"
+        # Set up matplotlib figure
+        pyplot.ion()
+        fig = pyplot.figure()
+        sp = fig.add_subplot(111)
+        sp.set_xlim(-1, grid.width)
+        sp.set_ylim(-1, grid.width)
+        # Initialize circles
+        circles = [[sp.scatter(x, y, alpha=0.0, c='k') for y in range(width)] for x in range(height)]
+        lines = {}
+        # Initialize lines joining circles
+        #     TODO: Figure out how to skip repeating lines
+        for x in range(height):
+            print "-- Row {} initialized".format(x)
+            for y in range(width):
+                adjacents = grid.cells[(x, y)][0]
+                for adjacent in adjacents:
+                    lines[((x, y), adjacent)] = sp.plot((x, adjacent[0]), (y, adjacent[1]), 'k-', alpha=0.0)
 
-    # Set up matplotlib figure
-    #pyplot.ion()
-    #fig = pyplot.figure()
-    #sp = fig.add_subplot(111)
-    #sp.set_xlim(-1, grid.width)
-    #sp.set_ylim(-1, grid.width)
-    # Initialize circles
-    #circles = [[sp.scatter(x, y, alpha=0.0, c='k') for y in range(width)] for x in range(height)]
-    #lines = {}
-    # Initialize lines joining circles
-    #     TODO: Figure out how to skip repeating lines
-    #for x in range(height):
-    #    for y in range(width):
-    #        adjacents = grid.cells[(x, y)][0]
-    #        for adjacent in adjacents:
-    #            lines[((x, y), adjacent)] = sp.plot((x, adjacent[0]), (y, adjacent[1]), 'k-', alpha=0.0)
-
-    print "Started Markov chain"
+    print "Starting Markov chain"
 
     t = 0
     T = T_init
@@ -177,30 +229,43 @@ def main():
             # Decide whether to remove
             if random.random() < math.exp(-1 / T):
                 grid.remove_dimer(sites, False)
-                #circles[sites[0][0]][sites[0][1]].set_alpha(0.0)
-                #circles[sites[1][0]][sites[1][1]].set_alpha(0.0)
-                #lines[(sites[0], sites[1])][0].set_alpha(0.0)
-                #lines[(sites[1], sites[0])][0].set_alpha(0.0)
+
+                if draw_mpl:
+                    circles[sites[0][0]][sites[0][1]].set_alpha(0.0)
+                    circles[sites[1][0]][sites[1][1]].set_alpha(0.0)
+                    lines[(sites[0], sites[1])][0].set_alpha(0.0)
+                    lines[(sites[1], sites[0])][0].set_alpha(0.0)
+
         elif not (grid.cells[sites[0]][1] or grid.cells[sites[1]][1]):
             # Always add dimer to empty sites
             grid.place_dimer(sites, False)
-            #circles[sites[0][0]][sites[0][1]].set_alpha(1.0)
-            #circles[sites[1][0]][sites[1][1]].set_alpha(1.0)
-            #lines[(sites[0], sites[1])][0].set_alpha(1.0)
-            #lines[(sites[1], sites[0])][0].set_alpha(1.0)
-        #if t % frameskip == 0:
-            # Redraw the figure
-            #sp.clear()
-            #for x in range(height):
-            #    for y in range(width):
-            #        if grid.cells[(x, y)][1]:
-            #            sp.scatter(x, y, c='k')
-            #sp.set_title("t=%07d, T=%.3f, n_dimers=%d" % (t, T, grid.n_dimers))
-            #fig.savefig("./test/%07d_%.3f_%d.png" % (t, T, grid.n_dimers))
-            #pyplot.draw()
 
-        if t % 1000 == 0:
-            print t, T, grid.n_dimers
+            if draw_mpl:
+                circles[sites[0][0]][sites[0][1]].set_alpha(1.0)
+                circles[sites[1][0]][sites[1][1]].set_alpha(1.0)
+                lines[(sites[0], sites[1])][0].set_alpha(1.0)
+                lines[(sites[1], sites[0])][0].set_alpha(1.0)
+
+        if t % frameskip == 0:
+            if draw_text:
+                print grid.draw()
+                time.sleep(0.05)
+
+            if draw_mpl:
+                # Redraw the figure
+                sp.clear()
+                for x in range(height):
+                    for y in range(width):
+                        if grid.cells[(x, y)][1]:
+                            sp.scatter(x, y, c='k')
+                sp.set_title("t=%07d, T=%.3f, n_dimers=%d" % (t, T, grid.n_dimers))
+                #fig.savefig("./test/%07d_%.3f_%d.png" % (t, T, grid.n_dimers))
+                pyplot.draw()
+
+        if t % 10 == 0:
+            efficiency = 100.0 * grid.n_dimers / (grid.width * grid.height)
+            print ("t: {0:d}, T: {1:.8f}, # dimers: {2:d} ({3:.2f}% efficiency)"
+                   .format(t, T, grid.n_dimers, efficiency))
 
 if __name__ == '__main__':
-    main()
+    main(10, True, False)
